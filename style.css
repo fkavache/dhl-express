@@ -15,6 +15,7 @@ body {
   color: #000000;
   line-height: 1.5;
   text-align: left;
+  font-variant-numeric: lining-nums;
 }
 
 /* Header & Navigation */
@@ -157,7 +158,6 @@ video {
 }
 
 .description-details {
-  border-top: 1px solid #111111;
   padding-top: 24px;
 }
 
@@ -219,14 +219,11 @@ video {
   }
 
   .nav {
-    flex-direction: column;
-    gap: 15px;
+    gap: 20px;
   }
 
   .nav-links {
-    width: 100%;
-    justify-content: center;
-    gap: 25px;
+    gap: 20px;
   }
 
   .main-content,
