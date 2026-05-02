@@ -213,7 +213,7 @@ video {
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
-  border: 1px solid black;
+  border: 1px solid #818181;
 }
 
 /* Responsive */
