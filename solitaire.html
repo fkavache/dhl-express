@@ -468,8 +468,15 @@
     }, { passive: false });
 
     document.addEventListener('touchend', e => {
-      pendingTouch = null;
-      if (drag) { endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }
+      if (drag) {
+        pendingTouch = null;
+        endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      } else if (pendingTouch) {
+        // Short tap — treat as a click/select
+        const { zone, pileIdx, cardIdx } = pendingTouch;
+        pendingTouch = null;
+        selectCard(zone, pileIdx, cardIdx);
+      }
     });
 
     newGame();
