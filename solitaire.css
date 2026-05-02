@@ -1,0 +1,148 @@
+body {
+  background: #fff;
+  min-height: 100vh;
+  user-select: none;
+}
+
+.main-content {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 32px 32px 60px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.game-header h1 { font-size: 38px; font-weight: 400; margin: 0; }
+.game-controls {
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  align-items: center; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.btn {
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  border-radius: 8px;
+  transition: background 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+.btn:hover { background: #f5f5f5; }
+.btn:active { opacity: 0.7; }
+
+#scoreDisplay { font-size: 13px; color: #555; letter-spacing: 0.5px; }
+
+.top-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.foundations { display: flex; gap: 14px; }
+
+.card-slot {
+  width: 190px;
+  height: 266px;
+  border-radius: 8px;
+  border: 1px dashed #ccc;
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-slot .suit-hint { font-size: 36px; color: rgba(0,0,0,0.12); pointer-events: none; }
+
+.tableau { display: flex; gap: 14px; align-items: flex-start; }
+.tableau-col { width: 190px; flex-shrink: 0; min-height: 280px; position: relative; }
+
+.card {
+  width: 190px;
+  height: 266px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: absolute;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: box-shadow 0.12s, transform 0.12s;
+  flex-shrink: 0;
+}
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; border-radius: 8px; }
+.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.14); }
+.card.selected { box-shadow: 0 0 0 1.5px #000, 0 2px 8px rgba(0,0,0,0.12); transform: translateY(-5px); }
+
+#dragGhost { position: fixed; pointer-events: none; z-index: 9999; display: none; }
+#dragGhost .card { position: relative; left: 0 !important; top: 0 !important; }
+
+.drop-target-active { outline: 1px solid rgba(0,0,0,0.25); outline-offset: 2px; border-radius: 8px; }
+
+#winOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.88);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+}
+#winOverlay.show { display: flex; }
+#winOverlay h2 { font-size: 52px; font-weight: 400; }
+#winOverlay p { font-size: 16px; color: #555; }
+
+#toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #111;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9998;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Tablet */
+@media (max-width: 1300px) {
+  .card, .card-slot { width: 144px; height: 202px; }
+  .tableau-col { width: 144px; }
+  .top-row, .tableau { gap: 10px; }
+  .foundations { gap: 10px; }
+}
+
+/* Phone: fluid — fit 6 cols */
+@media (max-width: 700px) {
+  .main-content { padding: 14px 8px 40px; }
+  .game-header { margin-bottom: 16px; }
+  .game-header h1 { font-size: 26px; }
+  .top-row { gap: 4px; margin-bottom: 10px; }
+  .foundations { gap: 4px; }
+  .tableau { gap: 4px; }
+  .card, .card-slot {
+    width: calc((100vw - 36px) / 6);
+    height: calc((100vw - 36px) / 6 * 1.4);
+    border-radius: 5px;
+  }
+  .card-slot .suit-hint { font-size: 16px; }
+  .tableau-col {
+    width: calc((100vw - 36px) / 6);
+    min-height: calc((100vw - 36px) / 6 * 1.6);
+  }
+}

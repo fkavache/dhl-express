@@ -7,7 +7,6 @@
 html {
   scroll-behavior: smooth;
   font-variant-numeric: lining-nums;
-  font-feature-settings: "lnum";
   font-family: 'Georgia', 'Times New Roman', serif;
 }
 
@@ -16,10 +15,14 @@ body {
   color: #000000;
   line-height: 1.5;
   text-align: left;
-  font-variant-numeric: lining-nums;
 }
 
 /* Header & Navigation */
+
+.numbers {
+  font-family: 'Tinos', 'Georgia', 'Times New Roman', serif;
+}
+
 .header {
   padding: 20px 40px;
   border-bottom: 1px solid #efefef;
