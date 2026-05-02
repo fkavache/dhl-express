@@ -147,7 +147,7 @@
       const cards = getSelectedCards();
       if (!cards.length) return;
       if (!canPlaceOnTableau(cards[0], tableau[targetIdx])) {
-        toast('Invalid move'); selected = null; render(); return;
+        selected = null; render(); return;
       }
       saveState();
       removeSelected();
@@ -157,9 +157,9 @@
 
     function moveToFoundation(suit) {
       const cards = getSelectedCards();
-      if (cards.length !== 1) { toast('Move one card to foundation'); return; }
+      if (cards.length !== 1) { return; }
       const card = cards[0];
-      if (!canPlaceOnFoundation(card, suit)) { toast('Invalid move'); return; }
+      if (!canPlaceOnFoundation(card, suit)) { return; }
       saveState();
       removeSelected();
       found[suit].push(card);
@@ -369,10 +369,22 @@
         w.appendChild(el);
       });
       ghost.appendChild(w);
-      drag = { zone, pileIdx, cardIdx, offsetX: Math.round(CW * 0.16), offsetY: 20 };
-      moveGhost(clientX, clientY);
+
+      // Swap source cards to show back side while dragging
+      let sourceEls = [];
+      if (zone === 'waste') {
+        const s = document.getElementById('wasteSlot').querySelector('.card img');
+        if (s) sourceEls = [s];
+      } else {
+        const col = document.getElementById('tableauBoard').children[pileIdx];
+        if (col) sourceEls = Array.from(col.querySelectorAll('.card')).slice(cardIdx).map(el => el.querySelector('img')).filter(Boolean);
+      }
+      sourceEls.forEach(img => { img._savedSrc = img.src; img.src = BACK_IMG; });
+
       selected = { zone, pileIdx, cardIdx };
-      render();
+      drag = { zone, pileIdx, cardIdx, offsetX: Math.round(CW / 2), offsetY: Math.round(CH / 5), sourceEls };
+      moveGhost(clientX, clientY);
+
       if (addMouseListeners) {
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
@@ -397,6 +409,8 @@
       if (!drag) return;
       const ghost = document.getElementById('dragGhost');
       ghost.style.display = 'none'; ghost.innerHTML = '';
+      // Restore source card images
+      if (drag.sourceEls) drag.sourceEls.forEach(img => { if (img._savedSrc) { img.src = img._savedSrc; delete img._savedSrc; } });
       let el = document.elementFromPoint(clientX, clientY);
       let dropped = false;
       while (el && el !== document.body) {
