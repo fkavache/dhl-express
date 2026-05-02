@@ -6,8 +6,6 @@
       <nav class="nav">
         <a href="index.html" class="nav-logo">DHL快递</a>
         <div class="nav-links">
-          <a href="/" class="nav-link">Film</a>
-          <a href="/" class="nav-link">Info</a>
           <a href="solitaire.html" class="nav-link">Solitaire</a>
         </div>
       </nav>
