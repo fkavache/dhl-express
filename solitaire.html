@@ -241,7 +241,8 @@
         el.appendChild(cardImg(card.img, card.rank + ' ' + card.suit));
         el.addEventListener('click', e => { e.stopPropagation(); selectCard(zone, pileIdx, cardIdx); });
         el.addEventListener('dblclick', e => { e.stopPropagation(); selected = null; tryAutoFoundation(zone, pileIdx, cardIdx); });
-        el.addEventListener('mousedown', e => { if (e.button !== 0) return; startDrag(e, zone, pileIdx, cardIdx); });
+        el.addEventListener('mousedown', e => { if (e.button !== 0) return; e.preventDefault(); startDrag(e.clientX, e.clientY, zone, pileIdx, cardIdx, true); });
+        el.addEventListener('touchstart', e => { pendingTouch = { zone, pileIdx, cardIdx, x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
       } else {
         el.appendChild(cardImg(BACK_IMG, 'Card back'));
         el.style.cursor = 'default';
@@ -344,15 +345,22 @@
 
     // Drag & drop
     let drag = null;
+    let pendingTouch = null;
 
-    function startDrag(e, zone, pileIdx, cardIdx) {
+    function getCardDims() {
+      const slot = document.querySelector('.card-slot');
+      return slot ? { w: slot.offsetWidth, h: slot.offsetHeight } : { w: 190, h: 266 };
+    }
+
+    function startDrag(clientX, clientY, zone, pileIdx, cardIdx, addMouseListeners) {
       const cards = zone === 'waste' ? [waste[waste.length - 1]] : tableau[pileIdx].slice(cardIdx);
       if (!cards.length) return;
       const OV = 28;
+      const { w: CW, h: CH } = getCardDims();
       const ghost = document.getElementById('dragGhost');
       ghost.innerHTML = ''; ghost.style.display = 'block';
       const w = document.createElement('div');
-      w.style.cssText = 'position:relative;width:190px;height:' + (266 + (cards.length - 1) * OV) + 'px';
+      w.style.cssText = 'position:relative;width:' + CW + 'px;height:' + (CH + (cards.length - 1) * OV) + 'px';
       cards.forEach((card, i) => {
         const el = document.createElement('div');
         el.className = 'card';
@@ -361,13 +369,14 @@
         w.appendChild(el);
       });
       ghost.appendChild(w);
-      drag = { zone, pileIdx, cardIdx, offsetX: 30, offsetY: 20 };
-      moveGhost(e.clientX, e.clientY);
+      drag = { zone, pileIdx, cardIdx, offsetX: Math.round(CW * 0.16), offsetY: 20 };
+      moveGhost(clientX, clientY);
       selected = { zone, pileIdx, cardIdx };
       render();
-      document.addEventListener('mousemove', onDragMove);
-      document.addEventListener('mouseup', onDragEnd);
-      e.preventDefault();
+      if (addMouseListeners) {
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
     }
 
     function moveGhost(x, y) {
@@ -376,15 +385,19 @@
       ghost.style.top  = (y - drag.offsetY) + 'px';
     }
 
-    function onDragMove(e) { if (drag) moveGhost(e.clientX, e.clientY); }
+    function onMouseMove(e) { if (drag) moveGhost(e.clientX, e.clientY); }
 
-    function onDragEnd(e) {
+    function onMouseUp(e) {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      endDrag(e.clientX, e.clientY);
+    }
+
+    function endDrag(clientX, clientY) {
       if (!drag) return;
       const ghost = document.getElementById('dragGhost');
       ghost.style.display = 'none'; ghost.innerHTML = '';
-      document.removeEventListener('mousemove', onDragMove);
-      document.removeEventListener('mouseup', onDragEnd);
-      let el = document.elementFromPoint(e.clientX, e.clientY);
+      let el = document.elementFromPoint(clientX, clientY);
       let dropped = false;
       while (el && el !== document.body) {
         if (el.classList.contains('tableau-col')) {
@@ -422,6 +435,27 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { selected = null; render(); }
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+    });
+
+    // Touch drag support
+    document.addEventListener('touchmove', e => {
+      if (!pendingTouch && !drag) return;
+      const t = e.touches[0];
+      if (!drag && pendingTouch) {
+        const dx = t.clientX - pendingTouch.x;
+        const dy = t.clientY - pendingTouch.y;
+        if (Math.sqrt(dx * dx + dy * dy) > 8) {
+          const { zone, pileIdx, cardIdx } = pendingTouch;
+          pendingTouch = null;
+          startDrag(t.clientX, t.clientY, zone, pileIdx, cardIdx, false);
+        }
+      }
+      if (drag) { e.preventDefault(); moveGhost(t.clientX, t.clientY); }
+    }, { passive: false });
+
+    document.addEventListener('touchend', e => {
+      pendingTouch = null;
+      if (drag) { endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }
     });
 
     newGame();
