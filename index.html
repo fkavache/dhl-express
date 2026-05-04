@@ -10,25 +10,6 @@
 <body>
   <script src="header.js"></script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const video = entry.target.querySelector('video');
-            if (video && video.preload !== 'auto') {
-              video.preload = 'auto';
-              video.load();
-            }
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { rootMargin: '200px' });
-
-      document.querySelectorAll('.video-container').forEach(el => observer.observe(el));
-    });
-  </script>
-
   <main class="main-content">
     <section class="artwork-item">
       <h2 class="artwork-title">Super Phase <span class="numbers">2078</span></h2>
