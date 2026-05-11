@@ -205,7 +205,6 @@ video {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding-top: 20px;
 }
 
 .cast-grid img {
