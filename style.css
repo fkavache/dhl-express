@@ -213,6 +213,7 @@ video {
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
+  border: 1.5px solid #ECF0F2;
 }
 
 /* Explore Link */
@@ -262,7 +263,6 @@ video {
   color: #333333;
   font-weight: 400;
   padding: 30px 0;
-  max-width: 700px;
 }
 
 .explore-row-3 {
