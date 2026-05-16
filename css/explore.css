@@ -1,0 +1,30 @@
+.img-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  width: 100dvw;
+  height: 100%;
+  height: 100dvh;
+  background: rgb(255 255 255 / 77%);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  -webkit-overflow-scrolling: touch;
+}
+.img-overlay.active {
+  display: flex;
+}
+.img-overlay img {
+  max-width: 100vw;
+  max-height: 100vh;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+#flipbook,
+#flipbook2 {
+  background: #000;
+}

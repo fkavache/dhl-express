@@ -229,9 +229,13 @@ video {
   letter-spacing: 0.5px;
   border: 1px solid #000000;
   transition: background-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.explore-link:hover {
+.explore-link:hover,
+.explore-link:active {
   background-color: #000000;
   color: #ffffff;
 }
@@ -282,6 +286,10 @@ video {
 .explore-row-2 img {
   width: 100%;
   display: block;
+}
+
+.part-1 {
+  border-bottom: 1px solid #efefef;;
 }
 
 @media (max-width: 768px) {

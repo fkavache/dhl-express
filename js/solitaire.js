@@ -1,0 +1,445 @@
+window._sol = (() => {
+  'use strict';
+
+  const SUITS = [
+    { name: 'hearts',   color: 'red',   start: 2,  hint: 'hearts_hint' },
+    { name: 'diamonds', color: 'red',   start: 16, hint: 'diamonds_hint' },
+    { name: 'spades',   color: 'black', start: 30, hint: 'spades_hint' },
+    { name: 'clubs',    color: 'black', start: 44, hint: 'clubs_hint' },
+  ];
+  const SUIT_HINTS = { hearts: '\u2665', diamonds: '\u2666', spades: '\u2660', clubs: '\u2663' };
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','V','D','K'];
+  const CARD_DIR = 'https://cdn.dhl-expresss.com/cards/';
+  const BACK_IMG = CARD_DIR + 'x.png';
+
+  function makeCard(id) {
+    const suit = SUITS.find(s => id >= s.start && id <= s.start + 12);
+    if (!suit) return null;
+    const rankIdx = id - suit.start;
+    return {
+      id, suit: suit.name, color: suit.color,
+      rank: RANKS[rankIdx], value: rankIdx + 1,
+      img: CARD_DIR + id + '.png', face: false,
+    };
+  }
+
+  function buildDeck() {
+    const deck = [];
+    for (let n = 2; n <= 56; n++) {
+      if (n === 15 || n === 29 || n === 43) continue;
+      const c = makeCard(n);
+      if (c) deck.push(c);
+    }
+    return deck;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  let tableau = [], stock = [], waste = [];
+  let found = { hearts: [], diamonds: [], spades: [], clubs: [] };
+  let score = 0, selected = null, history = [];
+
+  function newGame() {
+    document.getElementById('winOverlay').classList.remove('show');
+    const deck = buildDeck();
+    shuffle(deck);
+    tableau = [];
+    for (let i = 0; i < 6; i++) {
+      const pile = deck.splice(0, i + 1).map((c, idx) => ({ ...c, face: idx === i }));
+      tableau.push(pile);
+    }
+    stock = deck.map(c => ({ ...c, face: false }));
+    waste = []; found = { hearts: [], diamonds: [], spades: [], clubs: [] };
+    score = 0; selected = null; history = [];
+    render();
+  }
+
+  function saveState() {
+    history.push(JSON.stringify({ tableau, stock, waste, found, score }));
+    if (history.length > 60) history.shift();
+  }
+
+  function undo() {
+    if (!history.length) { toast('Nothing to undo'); return; }
+    const snap = JSON.parse(history.pop());
+    ({ tableau, stock, waste, found, score } = snap);
+    selected = null; render();
+  }
+
+  function canPlaceOnTableau(card, pile) {
+    if (!pile.length) return card.value === 13;
+    const top = pile[pile.length - 1];
+    return top.face && top.color !== card.color && top.value === card.value + 1;
+  }
+
+  function canPlaceOnFoundation(card, suit) {
+    if (card.suit !== suit) return false;
+    const f = found[suit];
+    return f.length === 0 ? card.value === 1 : card.value === f[f.length - 1].value + 1;
+  }
+
+  function getSelectedCards() {
+    if (!selected) return [];
+    if (selected.zone === 'waste') return [waste[waste.length - 1]];
+    return tableau[selected.pileIdx].slice(selected.cardIdx);
+  }
+
+  function removeSelected() {
+    if (!selected) return;
+    if (selected.zone === 'waste') {
+      waste.pop();
+    } else {
+      tableau[selected.pileIdx].splice(selected.cardIdx);
+      const pile = tableau[selected.pileIdx];
+      if (pile.length && !pile[pile.length - 1].face) {
+        pile[pile.length - 1].face = true;
+        score += 5;
+      }
+    }
+    selected = null;
+  }
+
+  function moveToTableau(targetIdx) {
+    const cards = getSelectedCards();
+    if (!cards.length) return;
+    if (!canPlaceOnTableau(cards[0], tableau[targetIdx])) {
+      selected = null; render(); return;
+    }
+    saveState();
+    removeSelected();
+    tableau[targetIdx].push(...cards);
+    score += 5; render(); checkWin();
+  }
+
+  function moveToFoundation(suit) {
+    const cards = getSelectedCards();
+    if (cards.length !== 1) { return; }
+    const card = cards[0];
+    if (!canPlaceOnFoundation(card, suit)) { return; }
+    saveState();
+    removeSelected();
+    found[suit].push(card);
+    score += 10; render(); checkWin();
+  }
+
+  function drawStock() {
+    if (stock.length > 0) {
+      saveState();
+      const c = stock.pop();
+      c.face = true; waste.push(c);
+      selected = null; score = Math.max(0, score - 2); render();
+    } else if (waste.length > 0) {
+      saveState();
+      while (waste.length) { const c = waste.pop(); c.face = false; stock.push(c); }
+      selected = null; score = Math.max(0, score - 20); render();
+    }
+  }
+
+  function selectCard(zone, pileIdx, cardIdx) {
+    if (selected && selected.zone === zone && selected.pileIdx === pileIdx && selected.cardIdx === cardIdx) {
+      selected = null; render(); return;
+    }
+    if (selected) {
+      if (zone === 'tableau') {
+        const pile = tableau[pileIdx];
+        const cc = pile[cardIdx];
+        if (!cc || !cc.face) { selected = null; render(); return; }
+        moveToTableau(pileIdx); return;
+      }
+      if (zone === 'foundation') { moveToFoundation(pileIdx); return; }
+    }
+    if (zone === 'waste') {
+      if (!waste.length) return;
+      selected = { zone: 'waste', pileIdx: null, cardIdx: waste.length - 1 };
+    } else if (zone === 'tableau') {
+      const pile = tableau[pileIdx];
+      if (!pile[cardIdx] || !pile[cardIdx].face) { selected = null; render(); return; }
+      selected = { zone: 'tableau', pileIdx, cardIdx };
+    }
+    render();
+  }
+
+  function tryAutoFoundation(zone, pileIdx, cardIdx) {
+    let card = null;
+    if (zone === 'waste') card = waste[waste.length - 1];
+    else if (zone === 'tableau') card = tableau[pileIdx][cardIdx];
+    if (!card) return;
+    for (const suit of Object.keys(found)) {
+      if (canPlaceOnFoundation(card, suit)) {
+        selected = { zone, pileIdx, cardIdx };
+        moveToFoundation(suit); return;
+      }
+    }
+    toast('No foundation move available');
+  }
+
+  function checkWin() {
+    if (Object.values(found).every(f => f.length === 13)) {
+      score += 200;
+      document.getElementById('winScore').textContent = 'Final score: ' + score;
+      document.getElementById('winOverlay').classList.add('show');
+    }
+  }
+
+  function cardImg(src, alt) {
+    const img = document.createElement('img');
+    img.src = src; img.alt = alt || ''; img.draggable = false;
+    return img;
+  }
+
+  function makeCardEl(card, zone, pileIdx, cardIdx, topOffset) {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.top = topOffset + 'px';
+    const isSel = selected && selected.zone === zone && selected.pileIdx === pileIdx && selected.cardIdx === cardIdx;
+    if (isSel) el.classList.add('selected');
+    if (card.face) {
+      el.appendChild(cardImg(card.img, card.rank + ' ' + card.suit));
+      el.addEventListener('click', e => { e.stopPropagation(); selectCard(zone, pileIdx, cardIdx); });
+      el.addEventListener('dblclick', e => { e.stopPropagation(); selected = null; tryAutoFoundation(zone, pileIdx, cardIdx); });
+      el.addEventListener('mousedown', e => { if (e.button !== 0) return; e.preventDefault(); startDrag(e.clientX, e.clientY, zone, pileIdx, cardIdx, true); });
+      el.addEventListener('touchstart', e => { pendingTouch = { zone, pileIdx, cardIdx, x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+    } else {
+      el.appendChild(cardImg(BACK_IMG, 'Card back'));
+      el.style.cursor = 'default';
+    }
+    return el;
+  }
+
+  function render() {
+    document.getElementById('scoreDisplay').textContent = 'Score: ' + score;
+
+    // Stock
+    const stockSlot = document.getElementById('stockSlot');
+    stockSlot.innerHTML = '';
+    if (stock.length > 0) {
+      const el = document.createElement('div');
+      el.className = 'card'; el.style.position = 'relative';
+      el.appendChild(cardImg(BACK_IMG, 'Stock'));
+      el.addEventListener('click', drawStock);
+      stockSlot.appendChild(el);
+    } else if (waste.length > 0) {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.style.cssText = 'position:relative;display:flex;align-items:center;justify-content:center;background:#f5f5f5;font-size:32px;cursor:pointer;border-radius:8px;color:#aaa;';
+      el.textContent = '\u21BA';
+      el.addEventListener('click', drawStock);
+      stockSlot.appendChild(el);
+    }
+
+    // Waste
+    const wasteSlot = document.getElementById('wasteSlot');
+    wasteSlot.innerHTML = '';
+    if (waste.length > 0) {
+      const top = waste[waste.length - 1];
+      const el = makeCardEl(top, 'waste', null, waste.length - 1, 0);
+      el.style.position = 'relative';
+      wasteSlot.appendChild(el);
+    }
+
+    // Foundations
+    const foundRow = document.getElementById('foundationsRow');
+    foundRow.innerHTML = '';
+    for (const suit of SUITS) {
+      const slot = document.createElement('div');
+      slot.className = 'card-slot';
+      const pile = found[suit.name];
+      if (pile.length > 0) {
+        const top = pile[pile.length - 1];
+        const el = makeCardEl(top, 'foundation', suit.name, pile.length - 1, 0);
+        el.style.position = 'relative';
+        el.onclick = e => { e.stopPropagation(); if (selected) moveToFoundation(suit.name); };
+        slot.appendChild(el);
+      } else {
+        const hint = document.createElement('span');
+        hint.className = 'suit-hint';
+        hint.textContent = SUIT_HINTS[suit.name];
+        slot.appendChild(hint);
+        slot.addEventListener('click', () => { if (selected) moveToFoundation(suit.name); });
+      }
+      if (selected) {
+        const cards = getSelectedCards();
+        if (cards.length === 1 && canPlaceOnFoundation(cards[0], suit.name)) slot.classList.add('drop-target-active');
+      }
+      foundRow.appendChild(slot);
+    }
+
+    // Tableau
+    const board = document.getElementById('tableauBoard');
+    board.innerHTML = '';
+    const OV_UP = 18, OV_DOWN = 28;
+
+    tableau.forEach((pile, pileIdx) => {
+      const col = document.createElement('div');
+      col.className = 'tableau-col';
+      if (pile.length === 0) {
+        const slot = document.createElement('div');
+        slot.className = 'card-slot'; slot.style.position = 'relative';
+        if (selected) slot.classList.add('drop-target-active');
+        slot.addEventListener('click', () => { if (selected) moveToTableau(pileIdx); });
+        col.appendChild(slot);
+        col.style.minHeight = '140px';
+      } else {
+        let offset = 0;
+        pile.forEach((card, cardIdx) => {
+          const top = offset;
+          const el = makeCardEl(card, 'tableau', pileIdx, cardIdx, top);
+          col.appendChild(el);
+          if (cardIdx < pile.length - 1) offset += card.face ? OV_DOWN : OV_UP;
+        });
+        const totalH = offset + 126;
+        col.style.minHeight = (totalH + 20) + 'px';
+        col.addEventListener('click', () => { if (selected) moveToTableau(pileIdx); });
+        if (selected) {
+          const cards = getSelectedCards();
+          if (cards.length && canPlaceOnTableau(cards[0], pile)) col.classList.add('drop-target-active');
+        }
+      }
+      board.appendChild(col);
+    });
+  }
+
+  // Drag & drop
+  let drag = null;
+  let pendingTouch = null;
+
+  function getCardDims() {
+    const slot = document.querySelector('.card-slot');
+    return slot ? { w: slot.offsetWidth, h: slot.offsetHeight } : { w: 190, h: 266 };
+  }
+
+  function startDrag(clientX, clientY, zone, pileIdx, cardIdx, addMouseListeners) {
+    const cards = zone === 'waste' ? [waste[waste.length - 1]] : tableau[pileIdx].slice(cardIdx);
+    if (!cards.length) return;
+    const OV = 28;
+    const { w: CW, h: CH } = getCardDims();
+    const ghost = document.getElementById('dragGhost');
+    ghost.innerHTML = ''; ghost.style.display = 'block';
+    const w = document.createElement('div');
+    w.style.cssText = 'position:relative;width:' + CW + 'px;height:' + (CH + (cards.length - 1) * OV) + 'px';
+    cards.forEach((card, i) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.style.cssText = 'position:absolute;top:' + (i * OV) + 'px;left:0';
+      el.appendChild(cardImg(card.img, ''));
+      w.appendChild(el);
+    });
+    ghost.appendChild(w);
+
+    // Swap source cards to show back side while dragging
+    let sourceEls = [];
+    if (zone === 'waste') {
+      const s = document.getElementById('wasteSlot').querySelector('.card img');
+      if (s) sourceEls = [s];
+    } else {
+      const col = document.getElementById('tableauBoard').children[pileIdx];
+      if (col) sourceEls = Array.from(col.querySelectorAll('.card')).slice(cardIdx).map(el => el.querySelector('img')).filter(Boolean);
+    }
+    sourceEls.forEach(img => { img._savedSrc = img.src; img.src = BACK_IMG; });
+
+    selected = { zone, pileIdx, cardIdx };
+    drag = { zone, pileIdx, cardIdx, offsetX: Math.round(CW / 2), offsetY: Math.round(CH / 5), sourceEls };
+    moveGhost(clientX, clientY);
+
+    if (addMouseListeners) {
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    }
+  }
+
+  function moveGhost(x, y) {
+    const ghost = document.getElementById('dragGhost');
+    ghost.style.left = (x - drag.offsetX) + 'px';
+    ghost.style.top  = (y - drag.offsetY) + 'px';
+  }
+
+  function onMouseMove(e) { if (drag) moveGhost(e.clientX, e.clientY); }
+
+  function onMouseUp(e) {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    endDrag(e.clientX, e.clientY);
+  }
+
+  function endDrag(clientX, clientY) {
+    if (!drag) return;
+    const ghost = document.getElementById('dragGhost');
+    ghost.style.display = 'none'; ghost.innerHTML = '';
+    // Restore source card images
+    if (drag.sourceEls) drag.sourceEls.forEach(img => { if (img._savedSrc) { img.src = img._savedSrc; delete img._savedSrc; } });
+    let el = document.elementFromPoint(clientX, clientY);
+    let dropped = false;
+    while (el && el !== document.body) {
+      if (el.classList.contains('tableau-col')) {
+        const cols = Array.from(document.getElementById('tableauBoard').children);
+        const idx = cols.indexOf(el);
+        if (idx !== -1) { moveToTableau(idx); dropped = true; break; }
+      }
+      if (el.classList.contains('card-slot') || el.classList.contains('card')) {
+        const foundRow = document.getElementById('foundationsRow');
+        let node = el;
+        while (node && node !== foundRow) node = node.parentElement;
+        if (node === foundRow) {
+          const slots = Array.from(foundRow.children);
+          let sEl = el; while (sEl && !slots.includes(sEl)) sEl = sEl.parentElement;
+          const sIdx = slots.indexOf(sEl);
+          if (sIdx !== -1) { moveToFoundation(SUITS[sIdx].name); dropped = true; break; }
+        }
+      }
+      el = el.parentElement;
+    }
+    if (!dropped) { selected = null; render(); }
+    drag = null;
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  document.getElementById('newGameBtn').addEventListener('click', newGame);
+  document.getElementById('undoBtn').addEventListener('click', undo);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { selected = null; render(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+  });
+
+  // Touch drag support
+  document.addEventListener('touchmove', e => {
+    if (!pendingTouch && !drag) return;
+    const t = e.touches[0];
+    if (!drag && pendingTouch) {
+      const dx = t.clientX - pendingTouch.x;
+      const dy = t.clientY - pendingTouch.y;
+      if (Math.sqrt(dx * dx + dy * dy) > 8) {
+        const { zone, pileIdx, cardIdx } = pendingTouch;
+        pendingTouch = null;
+        startDrag(t.clientX, t.clientY, zone, pileIdx, cardIdx, false);
+      }
+    }
+    if (drag) { e.preventDefault(); moveGhost(t.clientX, t.clientY); }
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (drag) {
+      pendingTouch = null;
+      endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    } else if (pendingTouch) {
+      // Short tap — treat as a click/select
+      const { zone, pileIdx, cardIdx } = pendingTouch;
+      pendingTouch = null;
+      selectCard(zone, pileIdx, cardIdx);
+    }
+  });
+
+  newGame();
+  return { newGame };
+})();
