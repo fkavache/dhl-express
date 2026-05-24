@@ -107,6 +107,7 @@ body {
   border: 1px solid #efefef;
 }
 
+.video-container img,
 video {
   width: 100%;
   height: auto;
@@ -212,7 +213,6 @@ video {
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
-  border: 1.5px solid #ECF0F2;
 }
 
 /* Explore Link */
@@ -356,6 +356,10 @@ video {
 
   .video-container {
     margin: 20px 0;
+  }
+
+  .explore-video {
+    margin: 0 0;
   }
 
   .description-details {
