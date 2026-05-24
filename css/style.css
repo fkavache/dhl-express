@@ -114,6 +114,10 @@ video {
   display: block;
 }
 
+.ethiopic-question {
+  font-family: 'Noto Sans Ethiopic', sans-serif;
+}
+
 /* Artwork Info Section */
 .artwork-info-section {
   padding: 60px 0 100px 0;
