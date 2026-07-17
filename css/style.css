@@ -17,6 +17,18 @@ body {
   text-align: left;
 }
 
+a,
+a:visited,
+a:link {
+  color: inherit;
+}
+
+.credits-text a,
+.credits-text a:visited,
+.credits-text a:link {
+  color: #0000ee;
+}
+
 /* Header & Navigation */
 
 .numbers {

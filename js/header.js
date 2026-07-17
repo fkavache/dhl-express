@@ -7,6 +7,7 @@
         <a href="index.html" class="nav-logo">DHL快递</a>
         <div class="nav-links">
           <a href="solitaire.html" class="nav-link">Solitaire</a>
+          <a href="about.html" class="nav-link">About</a>
         </div>
       </nav>
     </header>
