@@ -22,7 +22,7 @@ class VideoPlayer extends HTMLElement {
         controlsList="nodownload noplaybackrate"
         disablePictureInPicture
         oncontextmenu="return false;"
-        preload="auto"
+        preload="metadata"
         poster="${poster}">
         <source src="${src}" type="${type}">
         Your browser does not support the video tag.
