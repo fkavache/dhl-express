@@ -10,6 +10,7 @@
 </head>
 <body>
   <script src="js/header.js"></script>
+  <script src="js/video-player.js"></script>
 
   <main class="explore-content eve-said-no-page">
     <h1 class="explore-title">Eve Said No</span></h1>
@@ -17,16 +18,10 @@
     <div class="part">
 
       <div class="video-container explore-video">
-        <video 
-          controls 
-          controlsList="nodownload noplaybackrate" 
-          disablePictureInPicture 
-          oncontextmenu="return false;"
-          preload="metadata" 
-          poster="https://cdn.dhl-expresss.com/images/eve_said_no_th.png">
-          <source src="https://cdn.dhl-expresss.com/videos/Eve%20Said%20No.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
+        <video-player
+          poster="https://cdn.dhl-expresss.com/images/eve_said_no_th.png"
+          src="https://cdn.dhl-expresss.com/videos/Eve%20Said%20No.mp4"
+        ></video-player>
       </div>
 <!-- 
       <p class="explore-text">

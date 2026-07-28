@@ -10,6 +10,7 @@
 </head>
 <body>
   <script src="js/header.js"></script>
+  <script src="js/video-player.js"></script>
 
   <main class="explore-content">
     <h1 class="explore-title">Super Phase <span class="numbers">2078</span></h1>
@@ -101,16 +102,10 @@
       > -->
 
       <div class="video-container explore-video">
-        <video 
-          controls 
-          controlsList="nodownload noplaybackrate" 
-          disablePictureInPicture 
-          oncontextmenu="return false;"
-          preload="metadata" 
-          poster="https://cdn.dhl-expresss.com/images/super_phase_2078_16mm_th.png">
-          <source src="https://cdn.dhl-expresss.com/videos/Super%20Phase%202078_16mm.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
+        <video-player
+          poster="https://cdn.dhl-expresss.com/images/super_phase_2078_16mm_th.png"
+          src="https://cdn.dhl-expresss.com/videos/Super%20Phase%202078_16mm.mp4"
+        ></video-player>
       </div>
 
       <p class="explore-text">
