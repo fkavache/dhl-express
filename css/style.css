@@ -7,7 +7,7 @@
 html {
   scroll-behavior: smooth;
   font-variant-numeric: lining-nums;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Times New Roman', serif;
 }
 
 body {
@@ -31,10 +31,6 @@ a:link {
 
 /* Header & Navigation */
 
-.numbers {
-  font-family: 'Lora', 'Georgia', 'Times New Roman', serif;
-}
-
 .header {
   padding: 20px 40px;
   border-bottom: 1px solid #efefef;
@@ -54,7 +50,7 @@ a:link {
 }
 
 .nav-logo {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
   text-decoration: none;
@@ -68,7 +64,7 @@ a:link {
 }
 
 .nav-link {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   letter-spacing: 0.5px;
   text-decoration: none;
@@ -98,7 +94,7 @@ a:link {
 }
 
 .artwork-title {
-  font-size: 48px;
+  font-size: 50px;
   font-weight: 400;
   line-height: 1.1;
   margin-bottom: 30px;
@@ -106,7 +102,7 @@ a:link {
 }
 
 .artwork-subtitle {
-  font-size: 15px;
+  font-size: 16px;
   color: #66666400;
   line-height: 1.6;
   line-height: 1.6;
@@ -153,7 +149,7 @@ video {
 }
 
 .info-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -161,7 +157,7 @@ video {
 }
 
 .info-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   color: #000000;
   letter-spacing: 0.5px;
@@ -182,7 +178,7 @@ video {
 }
 
 .description-summary {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   outline: none;
@@ -207,7 +203,7 @@ video {
 }
 
 .description-text {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   color: #333333;
   font-weight: 400;
@@ -233,7 +229,7 @@ video {
   align-self: flex-start;
   margin-top: 24px;
   padding: 7px 18px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   text-decoration: none;
   color: #000000;
@@ -260,7 +256,7 @@ video {
 }
 
 .explore-title {
-  font-size: 48px;
+  font-size: 50px;
   font-weight: 400;
   line-height: 1.1;
   margin-bottom: 40px;
@@ -273,7 +269,7 @@ video {
 }
 
 .explore-text {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   color: #333333;
   font-weight: 400;
@@ -363,7 +359,7 @@ video {
   }
 
   .artwork-subtitle {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .video-container {
@@ -404,7 +400,7 @@ video {
 }
 
 .detail-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -412,7 +408,7 @@ video {
 }
 
 .detail-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: #000000;
 }
@@ -424,7 +420,7 @@ video {
 }
 
 .description-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -433,7 +429,7 @@ video {
 }
 
 .description-text {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   color: #333333;
   font-weight: 300;
