@@ -419,6 +419,10 @@ body#ektachrome-page #webamp-context-menu .context-menu > li:nth-child(7) {
     font-size: 32px;
   }
 
+  .ag47-number {
+    font-size: 0.72em;
+  }
+
   .artwork-subtitle {
     font-size: 15px;
   }
